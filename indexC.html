@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <title>WebSocket Server Client simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <style>
+
+  html {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+  }
+  h1 {
+    font-size: 1.8rem;
+    color: white;
+  }
+  h2{
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #143642;
+  }
+  .topnav {
+    overflow: hidden;
+    background-color: #143642;
+  }
+  body {
+    margin: 0;
+  }
+  .content {
+    padding: 30px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .card {
+    background-color: #F8F7F9;;
+    box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
+    padding-top:10px;
+    padding-bottom:20px;
+  }
+  .button {
+    padding: 15px 50px;
+    font-size: 24px;
+    text-align: center;
+    outline: none;
+    color: #fff;
+    background-color: #0f8b8d;
+    border: none;
+    border-radius: 5px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+   }
+   .button:active {
+     background-color: #0f8b8d;
+     box-shadow: 2 2px #CDCDCD;
+     transform: translateY(2px);
+   }
+   .state {
+     font-size: 1.5rem;
+     color:#8c8c8c;
+     font-weight: bold;
+   }
+
+   .gauge {
+    position: relative; top:0%; margin-left: 30%;
+    border-radius: 50%/100% 100% 0 0;
+    background-color: var(--color, #a22);
+    overflow: hidden;
+    }
+
+    .gauge:before{
+        content: "";
+        display: block;
+        padding-top: 50%;   /* ratio of 2:1*/
+    }
+    .gauge .chart {
+    overflow: hidden;
+    }
+    .gauge .mask {
+    position: absolute;
+    left: 20%;
+    right: 20%;
+    bottom: 0;
+    top: 40%;
+    background-color: #fff;
+    border-radius: 50%/100% 100% 0 0;
+    }
+
+    .gauge .percentage {
+        position:  absolute;
+        top: -1px;
+        left: -1px;
+        bottom: 0;
+        right: -1px;
+        background-color: var(--background, #aaa);
+        transform:rotate(var(--rotation)); 
+        transform-origin: bottom center; 
+        transition-duration: 600;
+    }
+    .gauge:hover {
+    --rotation: 100deg;
+    }
+    .gauge .value {
+    position:absolute; bottom:0%; left:0;   
+    width:100%; 
+    text-align: center;
+    }
+
+    .gauge .min {
+    position:absolute; 
+    bottom:0; left:5%;   
+    }
+    .gauge .max {
+    position:absolute; 
+    bottom:0; right:5%;   
+    }
+
+  </style>
+
+</head>
+
+<body>
+    <div class="topnav">
+        <h1>WebSocket Server Client Simulator</h1>
+      </div>
+
+      <div class="content">
+        <h2>
+            <p>Status of client connection to server is: </p>
+        </h2>
+        <div class="card">
+          <h2>
+            <p style="color:rgb(255, 0, 51);font-weight:bold;" id="connection"></p>
+          </h2>
+          <!-- <p class="state">state: <span id="state">%STATE%</span></p> -->
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="card">
+          <p><button id="button1" class="button">Start charging</button></p>
+          <p><button id="button2" class="button">Stop charging</button></p>
+        </div>
+      </div>
+
+      <input type="text" id="inputText" placeholder="Type something to simulate event...">
+      <button id="submitButton">Submit</button>
+      <div id="placeholder"></div>      
+
+      <div class="content">
+        <div class="card">
+            <h3>
+                <p>Current state of charger is: <span style="color:blue;font-weight:bold;" id="container"></span></p> 
+            </h3>
+        </div>    
+      </div>
+
+      <div class="content">
+        
+            <div class="gauge" id="meter" style="width: 200px; --rotation:1deg; --color:#5cb85c; --background:#e9ecef;">
+                <div class="percentage"></div>
+                <div class="mask"></div>
+                <span class="value" id="gaugenum">0</span>
+            </div>
+          
+      </div>
+
+	<script>
+		// Create a WebSocket connection to the server
+		const socket = new WebSocket('ws://localhost:80/ws');
+
+        // define key elements for gauge display
+        let meter = document.getElementById("meter");
+        let gnum = document.getElementById("gaugenum")
+        let currentNumber = meter.innerText;
+
+		// Function to display messages on the web page
+		function showMessage(message) {
+			const messageContainer = document.getElementById('container');
+			const messageElement = document.createElement('span');
+			messageContainer.textContent = message
+
+            //messageElement.textContent = message;
+			//messageContainer.appendChild(messageElement);
+		}
+
+		// Function to display connection status on the web page
+		function showStatus(message) {
+			const messageContainer = document.getElementById('connection');
+			const messageElement = document.createElement('span');
+			messageContainer.textContent = message
+		}
+
+
+		// Event handler for when the connection is established
+		socket.addEventListener('open', (event) => {
+			showStatus('Connected to server');
+		});
+
+		// Event handler for receiving messages from the server
+		socket.onmessage = (event) => {
+            var t = Number(event.data)
+            if (isNaN(t)){
+                showMessage(event.data)
+            } else {
+                currentNumber = t
+                gnum.innerText = t 
+                deg = Math.round((t / 100) * 180);
+                meter.style.setProperty("--rotation", `${deg}deg`);
+                showMessage("Number is " + event.data)
+            }			
+		}
+
+		// Event handler for when the connection is closed
+		socket.addEventListener('close', (event) => {
+			showStatus('Connection closed');
+		});
+
+
+        // Event handler for button clicks
+		const inputText = document.getElementById("inputText");
+		const submitButton = document.getElementById("submitButton");
+
+		submitButton.addEventListener("click", function() {
+			const inputValue = inputText.value;
+			socket.send(inputValue)
+		});
+
+        const StartButton = document.getElementById("button1")
+        const StopButton = document.getElementById("button2")
+
+		StartButton.addEventListener("click", function() {
+			socket.send("webon")
+		});
+
+		StopButton.addEventListener("click", function() {
+			socket.send("weboff")
+		});
+
+        // javascript to generate random number as placeholder for gauge meter value
+        const changeNum = () => {
+        const randomNum = Math.round(Math.random() * 100);
+        const degrees = Math.round((randomNum / 100) * 180);
+        const root = document.getElementById("meter");
+        //let meter = document.getElementById("meter");
+        //let gnum = document.getElementById("gaugenum")
+        //let currentNumber = meter.innerText;
+        
+        currentNumber = randomNum
+        gnum.innerText = randomNum
+        
+        meter.style.setProperty("--rotation", `${degrees}deg`);
+        };
+        
+        setInterval(() => {
+        changeNum();
+        }, 10000);        
+
+
+    </script>
+
+
+</body>
+</html>
