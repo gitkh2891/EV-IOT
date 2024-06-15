@@ -1,4 +1,4 @@
-The files uploaed here are meant for mid-term prep and are correct as at 15th Jun 2024.
+The files uploaded here are meant for mid-term prep and are correct as at 15th Jun 2024.
 
 The server.py file represents the "backend" central server and is meant to be hosted in the cloud.
 This script sets up a simple WebSocket server on localhost and deploys 2 FastAPI endpoints: 
