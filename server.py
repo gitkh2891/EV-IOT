@@ -49,7 +49,7 @@ async def server_handle_message(message, ws):
 @app.get("/", response_class=HTMLResponse)
 def read_index(request: Request):
     # Render the HTML template
-    return templates.TemplateResponse("indexC.html", {"request" : request})
+    return templates.TemplateResponse("index.html", {"request" : request})
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
