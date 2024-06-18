@@ -76,7 +76,7 @@ async def server_handle_message(message, ws):
 @app.get("/", response_class=HTMLResponse)
 def read_index(request: Request):
 
-    return templates.TemplateResponse("indexC.html", {"request" : request})
+    return templates.TemplateResponse("index.html", {"request" : request})
 
 
 # http endpoint that invokes the Manager class and broadcast a "start" meesage with charger_id to all connected clients
