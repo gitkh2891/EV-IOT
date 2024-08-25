@@ -172,10 +172,17 @@ func WsChargerEndpoint(ginC *gin.Context) {
 }
 
 // added function in handler for Terry's implementation of service health check
-func GetServiceHealthCheck(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode("service is up and running")
+// refactored the functions and arguments with Codeium
+
+func GetServiceHealthCheck(c *gin.Context) {
+	c.JSON(http.StatusOK, "service is up and running")
 }
+
+// Original code by Terry
+// func GetServiceHealthCheck(w http.ResponseWriter, r *http.Request) {
+// 	w.WriteHeader(http.StatusOK)
+// 	json.NewEncoder(w).Encode("service is up and running")
+// }
 
 // this function was originally inside the provider_handler.go
 func CreateResponse(message string) map[string]interface{} {
